@@ -1,16 +1,18 @@
 import grovepi
-import grove_rgb_lcd
+import time
 
-ultrasonic_ranger_port = 2
-rotary_angle_sensor_port = 0
+ultrasonic_ranger_pin = 2
+rotary_angle_sensor_pin = 0
 
 grovepi.pinMode(ultrasonic_ranger_port, "INPUT")
 grovepi.pinMode(rotary_angle_sensor_port, "INPUT")
 
 threshold = 512
 
-grove_rgb_lcd.setRGB(255, 255, 255)
-grove_rgb_lcd.setText("Threshold: ", "")
+
+threshold_distance = 50
+rotary_angle_sensor_max = 1023
+rotary_angle_sensor_min = 0
 
 while True:
     threshold_raw = grovepi.analogRead(rotary_angle_sensor_port)
