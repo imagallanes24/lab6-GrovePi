@@ -5,23 +5,22 @@ ultrasonic_ranger_port = 2
 rotary_angle_sensor_port = 0
 
 grovepi.pinMode(ultrasonic_ranger_port, "INPUT")
+grovepi.pinMode(rotary_angle_sensor_port, "INPUT")
 
-threshold_min = 0
-threshold_max = 1023
+threshold = 512
 
 grove_rgb_lcd.setRGB(255, 255, 255)
 grove_rgb_lcd.setText("Threshold: ", "")
 
 while True:
     threshold_raw = grovepi.analogRead(rotary_angle_sensor_port)
-    threshold = int(grovepi.map(threshold_raw, 0, 1023, threshold_min, threshold_max))
+    threshold = int(rotary_value / 1023.0 * 517)
     distance = grovepi.ultrasonicRead(ultrasonic_ranger_port)
     object_present = distance < threshold
 
-    top_line = f"Threshold: {threshold}"
+    lcd_top_line = str(threshold)
     if object_present:
-        top_line += " OBJ PRES"
-    bottom_line = f"Distance: {distance}"
-    grove_rgb_lcd.setText(top_line, bottom_line)
+        lcd_top_line += " OBJ PRES"
+    lcd_bottom_line = str(distance)
 
-    grovepi.delay(50)
+    setText_norefresh(lcd_top_line + "\n" + lcd_bottom_line)
