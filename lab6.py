@@ -1,27 +1,36 @@
 import grovepi
-import grove_rgb_lcd
+import time
 
-ultrasonic_ranger_port = 2
-rotary_angle_sensor_port = 0
+ultrasonic_ranger_pin = 2
+rotary_angle_sensor_pin = 0
 
-grovepi.pinMode(ultrasonic_ranger_port, "INPUT")
+lcd_screen_pin = 2
+lcd_screen_columns = 16
 
-threshold_min = 0
-threshold_max = 1023
+grovepi.pinMode(lcd_screen_pin,"OUTPUT")
+grovepi.pinMode(lcd_screen_pin+1,"OUTPUT")
+grovepi.pinMode(lcd_screen_pin+2,"OUTPUT")
+lcd_screen = grovepi.new_lcd_screen(lcd_screen_pin,lcd_screen_columns)
 
-grove_rgb_lcd.setRGB(255, 255, 255)
-grove_rgb_lcd.setText("Threshold: ", "")
+threshold_distance = 50
+rotary_angle_sensor_max = 1023
+rotary_angle_sensor_min = 0
+
+ultrasonic_ranger_max = 517
+ultrasonic_ranger_min = 0
 
 while True:
-    threshold_raw = grovepi.analogRead(rotary_angle_sensor_port)
-    threshold = int(grovepi.map(threshold_raw, 0, 1023, threshold_min, threshold_max))
-    distance = grovepi.ultrasonicRead(ultrasonic_ranger_port)
-    object_present = distance < threshold
-
-    top_line = f"Threshold: {threshold}"
-    if object_present:
-        top_line += " OBJ PRES"
-    bottom_line = f"Distance: {distance}"
-    grove_rgb_lcd.setText(top_line, bottom_line)
-
-    grovepi.delay(50)
+    rotary_angle_sensor_value = grovepi.analogRead(rotary_angle_sensor_pin)
+    threshold_value = int((rotary_angle_sensor_value - rotary_angle_sensor_min) / (rotary_angle_sensor_max - rotary_angle_sensor_min) * threshold_distance)
+    
+    ultrasonic_ranger_value = grovepi.ultrasonicRead(ultrasonic_ranger_pin)
+    ultrasonic_ranger_value_mapped = int((ultrasonic_ranger_value - ultrasonic_ranger_min) / (ultrasonic_ranger_max - ultrasonic_ranger_min) * 100)
+    
+    grovepi.setText_norefresh(lcd_screen, "Threshold: " + str(threshold_distance) + " ")
+    
+    if ultrasonic_ranger_value < threshold_value:
+        grovepi.setText_norefresh(lcd_screen, "OBJ PRES", 1, 10)
+        
+    grovepi.setText_norefresh(lcd_screen, str(ultrasonic_ranger_value_mapped) + "%", 2, 0)
+    
+    time.sleep(0.1)
