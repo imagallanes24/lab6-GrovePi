@@ -1,28 +1,33 @@
 import grovepi
 import time
+from grove_rgb_lcd import *
 
-ultrasonic_ranger_pin = 2
-rotary_angle_sensor_pin = 0
+ultrasonic_ranger = 2
+rotary_angle_sensor = 0
+lcd_port = 1
 
-grovepi.pinMode(ultrasonic_ranger_port, "INPUT")
-grovepi.pinMode(rotary_angle_sensor_port, "INPUT")
+setRGB(0,255,0)
 
-threshold = 512
-
-
-threshold_distance = 50
-rotary_angle_sensor_max = 1023
-rotary_angle_sensor_min = 0
+threshold = grovepi.analogRead(rotary_angle_sensor)
+distance = grovepi.ultrasonicRead(ultrasonic_ranger)
 
 while True:
-    threshold_raw = grovepi.analogRead(rotary_angle_sensor_port)
-    threshold = int(rotary_value / 1023.0 * 517)
-    distance = grovepi.ultrasonicRead(ultrasonic_ranger_port)
-    object_present = distance < threshold
+	new_threshold = grovepi.analogRead(rotary_angle_sensor)
+	new_distance = grovepi.ultrasonicRead(ultrasonic_ranger)
 
-    lcd_top_line = str(threshold)
-    if object_present:
-        lcd_top_line += " OBJ PRES"
-    lcd_bottom_line = str(distance)
+	obj_pres = "OBJ PRES" if grovepi.ultrasonicRead(ultrasonic_ranger) < threshold else ""
+	if obj_pres:
+		setRGB(255,0,0)
+		setText_norefresh(str(threshold) + "cm " + obj_pres)
+	else:
+		setRGB(0,255,0)
 
-    setText_norefresh(lcd_top_line + "\n" + lcd_bottom_line)
+	if new_threshold != threshold:
+		threshold = new_threshold
+		setText_norefresh(str(threshold) + "cm ")
+
+	if new_distance != distance:
+		distance = new_distance
+		setText_norefresh("\n" + str(distance) + "cm")
+
+	time.sleep(0.01)
